@@ -1,22 +1,33 @@
 // Create initial constants
 const default_student = 'Student 1';
+const default_exam = 'Final';
+
+// Create variables
+let current_student = default_student;
+let current_exam = default_exam;
 
 // Load in Data
-let data = [];
+let finalData = [];
+let midterm1Data = [];
+let midterm2Data = [];
 async function loadData() {
-    data = await d3.csv('datasets/finaldata.csv');
+    finalData = await d3.csv('datasets/finaldata.csv');
+    midterm1Data = await d3.csv('datasets/midterm1data.csv');
+    midterm2Data = await d3.csv('datasets/midterm2data.csv');
 }
 
 // Call the initial functions when first loading the document
 document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
-    createLinePlot(default_student);
+    createLinePlot(default_student, default_exam);
+    updateTooltipVisibility('hidden');
 });
 
 // Function to generate the overall Line Plot
-function createLinePlot(student) {
-    // Get the data column with the name 'student'
-    const studentData = data.map(d => +d[student]).filter(d => d !== null && d !== 0);
+function createLinePlot(student, exam) {    
+    // Get the right exam data column with the name 'student'
+    const examData = {'Midterm 1': midterm1Data, 'Midterm 2': midterm2Data, 'Final': finalData};
+    const studentData = examData[exam].map(d => +d[student]).filter(d => d !== null && d !== 0);
 
     // Define content window of the line plot (Lab)
     const width = 1000;
@@ -93,6 +104,19 @@ function createLinePlot(student) {
         .attr('stroke-width', 2)
         .attr('d', lineData)
 
+    // Mean data + mean line
+    const meanData = finalData.map(row => {
+        const filtered = Object.values(row).map(d => +d).filter(d => d !== null && d !== 0);
+        return filtered.reduce((sum, value) => sum + value, 0) / filtered.length;
+    });
+    const meanLine = svg.append('path')
+        .datum(meanData)
+        .attr('fill', 'none')
+        .attr('stroke', 'gray')
+        .attr('stroke-width', 2)
+        .attr('d', lineData)
+        .attr('opacity', 0.4);
+
     // The highlight line when hovering over the plot
     const highlightLine = svg.append('line')
         .attr('stroke', 'black')
@@ -135,6 +159,9 @@ function createLinePlot(student) {
 
             // Modify the line plot's opacity
             line.attr('opacity', 0.75);
+            updateTooltipPosition(event);
+            updateTooltipData(dataPointValue, xIndex, student);
+            updateTooltipVisibility('visible');
         }
     });
 
@@ -143,14 +170,16 @@ function createLinePlot(student) {
         highlightLine.style('visibility', 'hidden');
         highlightCircle.style('visibility', 'hidden');
         line.attr('opacity', 1);
+        updateTooltipVisibility('hidden');
     });
 }
 
 // Function to update the line plot when selecting a different student
 function selectStudent(optionSelected) {
-    console.log(optionSelected);
+    current_student = optionSelected;
     d3.select('#line').selectAll('svg').remove();
-    createLinePlot(optionSelected);
+    createLinePlot(current_student, current_exam);
+    document.getElementsByClassName("selectedstudent")[0].innerText = 'Current Student: ' + current_student;
 }
 
 // Function to allow buttons to change currently selected student
@@ -158,3 +187,45 @@ d3.selectAll(".option").on("click", function() {
     const selectedStudent = d3.select(this).attr("data-value");
     selectStudent(selectedStudent);
 });
+
+// Function to update the line plot when selecting a different exam
+function selectExam(examSelected) {
+    current_exam = examSelected;
+    d3.select('#line').selectAll('svg').remove();
+    createLinePlot(current_student, current_exam);
+    document.getElementsByClassName("selectedexam")[0].innerText = 'Current Exam: ' + current_exam;
+}
+
+// Function to allow buttons to change currently selected exam
+d3.selectAll(".exam").on("click", function() {
+    const selectedExam = d3.select(this).attr("data-value");
+    selectExam(selectedExam);
+});
+
+// Function to update the tooltip position
+function updateTooltipPosition(event) {
+    const tooltip = document.getElementById('tooltip');
+    tooltip.style.left = `${event.clientX + 20}px`;
+    tooltip.style.top = `500px`;
+}
+
+function updateTooltipData(bpm_data, time_data, studentdisplayed) {
+    const studentdisplay = document.getElementById('tooltipstudent');
+    const bpm = document.getElementById('bpm');
+    const time = document.getElementById('time');
+
+    studentdisplay.textContent = studentdisplayed;
+    bpm.textContent = bpm_data;
+    time.textContent = time_data;
+}
+
+// Function to hide/show the tooltip
+function updateTooltipVisibility(status) {
+    const tooltip = document.getElementById('tooltip');
+    if (status === 'hidden') {
+        tooltip.hidden = true;
+    }
+    if (status === 'visible') {
+        tooltip.hidden = false;
+    }
+}
