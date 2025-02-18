@@ -11,12 +11,21 @@
 <body>
     <h1>How does Stress Influence Students during Exams?</h1>
     
-    
     <h2>Average Student Stress Throughout Exams</h2>
+    <button class="exam" data-value="Midterm 1">Midterm 1</button>
+    <button class="exam" data-value="Midterm 2">Midterm 2</button>
+    <button class="exam" data-value="Final">Final Exam</button>
+
+    <p class="selectedexam">Current Exam: Final</p>
+    <p class="selectedstudent">Current Student: Student 1</p>
     <div id="line"></div>
-    <!-- Plot each exam as a line Plot -->
-    <!-- Hover over the line to show stress at the current time -->
-    <!-- Hovering over a line highlights it while making all other lines more faded -->
+    <dl id="tooltip" class="tooltip">
+        <dt id="tooltipstudent"></dt>
+        <dd id="bpm"></dd>
+      
+        <dt>Time</dt>
+        <dd id="time"></dd>
+      </dl>
 
     <button class="option" data-value="Student 1">Student 1</button>
     <button class="option" data-value="Student 2">Student 2</button>
@@ -28,9 +37,8 @@
     <button class="option" data-value="Student 8">Student 8</button>
     <button class="option" data-value="Student 9">Student 9</button>
     <button class="option" data-value="Student 10">Student 10</button>
-    
-    <h2>Student Scores vs Exam Stress</h2>
-    <div id="scatter"></div>
+
+    <div id="brush-stats"></div>
     
 </body>
 </html>

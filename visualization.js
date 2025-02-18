@@ -1,22 +1,43 @@
 // Create initial constants
 const default_student = 'Student 1';
+const default_exam = 'Final';
+
+// Create variables
+let current_student = default_student;
+let current_exam = default_exam;
+
+//Global Variables for brush
+let xScale
+let yScale
+let studentData
+let width
+let height
 
 // Load in Data
-let data = [];
+let finalData = [];
+let midterm1Data = [];
+let midterm2Data = [];
 async function loadData() {
-    data = await d3.csv('datasets/finaldata.csv');
+    finalData = await d3.csv('datasets/finaldata.csv');
+    midterm1Data = await d3.csv('datasets/midterm1data.csv');
+    midterm2Data = await d3.csv('datasets/midterm2data.csv');
 }
 
 // Call the initial functions when first loading the document
 document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
-    createLinePlot(default_student);
+    createLinePlot(default_student, default_exam);
+    updateTooltipVisibility('hidden');
+    brushSelector();
+    d3.select(`[data-value='${default_exam}']`).classed("current", true);
+    d3.select(`[data-value='${default_student}']`).classed("current", true);
 });
 
 // Function to generate the overall Line Plot
-function createLinePlot(student) {
-    // Get the data column with the name 'student'
-    const studentData = data.map(d => +d[student]).filter(d => d !== null && d !== 0);
+function createLinePlot(student, exam) {    
+    // Get the right exam data column with the name 'student'
+    const examData = {'Midterm 1': midterm1Data, 'Midterm 2': midterm2Data, 'Final': finalData};
+    studentData = examData[exam].map(d => +d[student]).filter(d => d !== null && d !== 0);
 
     // Define content window of the line plot (Lab)
     const width = 1000;
@@ -32,11 +53,11 @@ function createLinePlot(student) {
     };
 
     // Create the x and y scales of the data
-    const xScale = d3.scaleLinear()
+    xScale = d3.scaleLinear()
     .domain([0, studentData.length - 1])
     .range([0, width]);
 
-    const yScale = d3.scaleLinear()
+    yScale = d3.scaleLinear()
     .domain([0, 200])
     .range([height, 0]);
 
@@ -93,6 +114,19 @@ function createLinePlot(student) {
         .attr('stroke-width', 2)
         .attr('d', lineData)
 
+    // Mean data + mean line
+    const meanData = finalData.map(row => {
+        const filtered = Object.values(row).map(d => +d).filter(d => d !== null && d !== 0);
+        return filtered.reduce((sum, value) => sum + value, 0) / filtered.length;
+    });
+    const meanLine = svg.append('path')
+        .datum(meanData)
+        .attr('fill', 'none')
+        .attr('stroke', 'gray')
+        .attr('stroke-width', 2)
+        .attr('d', lineData)
+        .attr('opacity', 0.4);
+
     // The highlight line when hovering over the plot
     const highlightLine = svg.append('line')
         .attr('stroke', 'black')
@@ -135,6 +169,9 @@ function createLinePlot(student) {
 
             // Modify the line plot's opacity
             line.attr('opacity', 0.75);
+            updateTooltipPosition(event);
+            updateTooltipData(dataPointValue, xIndex, student);
+            updateTooltipVisibility('visible');
         }
     });
 
@@ -143,14 +180,21 @@ function createLinePlot(student) {
         highlightLine.style('visibility', 'hidden');
         highlightCircle.style('visibility', 'hidden');
         line.attr('opacity', 1);
+        updateTooltipVisibility('hidden');
     });
 }
 
 // Function to update the line plot when selecting a different student
 function selectStudent(optionSelected) {
-    console.log(optionSelected);
+    current_student = optionSelected;
     d3.select('#line').selectAll('svg').remove();
-    createLinePlot(optionSelected);
+    createLinePlot(current_student, current_exam);
+    document.getElementsByClassName("selectedstudent")[0].innerText = 'Current Student: ' + current_student;
+    brushSelector();
+
+    //Included to update the current student when its button when pressed
+    d3.selectAll(".option").classed("current", false);
+    d3.select(`[data-value='${optionSelected}']`).classed("current", true);
 }
 
 // Function to allow buttons to change currently selected student
@@ -158,3 +202,136 @@ d3.selectAll(".option").on("click", function() {
     const selectedStudent = d3.select(this).attr("data-value");
     selectStudent(selectedStudent);
 });
+
+// Function to update the line plot when selecting a different exam
+function selectExam(examSelected) {
+    current_exam = examSelected;
+    d3.select('#line').selectAll('svg').remove();
+    createLinePlot(current_student, current_exam);
+    document.getElementsByClassName("selectedexam")[0].innerText = 'Current Exam: ' + current_exam;
+    brushSelector();
+
+    //Included to update the current exam when its button when pressed
+    d3.selectAll(".exam").classed("current", false);
+    d3.select(`[data-value='${examSelected}']`).classed("current", true);
+}
+
+// Function to allow buttons to change currently selected exam
+d3.selectAll(".exam").on("click", function() {
+    const selectedExam = d3.select(this).attr("data-value");
+    selectExam(selectedExam);
+});
+
+// Function to update the tooltip position
+function updateTooltipPosition(event) {
+    const tooltip = document.getElementById('tooltip');
+    tooltip.style.left = `${event.clientX + 20}px`;
+    tooltip.style.top = `500px`;
+}
+
+function updateTooltipData(bpm_data, time_data, studentdisplayed) {
+    const studentdisplay = document.getElementById('tooltipstudent');
+    const bpm = document.getElementById('bpm');
+    const time = document.getElementById('time');
+
+    studentdisplay.textContent = studentdisplayed;
+    bpm.textContent = bpm_data;
+    time.textContent = time_data;
+}
+
+// Function to hide/show the tooltip
+function updateTooltipVisibility(status) {
+    const tooltip = document.getElementById('tooltip');
+    if (status === 'hidden') {
+        tooltip.hidden = true;
+    }
+    if (status === 'visible') {
+        tooltip.hidden = false;
+    }
+}
+
+// Function to create a brush selection box
+function brushSelector() {
+    const svg = d3.select('#line svg'); // Select the existing SVG inside #line
+    
+    const bWidth = +svg.attr('viewBox').split(' ')[2];
+    const bHeight = +svg.attr('viewBox').split(' ')[3];
+    
+    const brush = d3.brushX()
+        .extent([[0, 0], [bWidth, bHeight]]) // Define brushable area
+        .on('start', brushStarted)
+        .on('brush', brushed)
+        .on('end', brushEnded);
+    
+    // Append the brush to the SVG
+    svg.append('g')
+        .attr('class', 'brush')
+        .call(brush);
+}
+
+// Function called when brushing starts
+function brushStarted(event) {
+    d3.selectAll('.highlight').remove(); // Remove any previous highlights
+}
+
+// Function to handle brushing
+function brushed(event) {
+    if (!event.selection) return;
+}
+
+// Function called when brushing ends
+function brushEnded(event) {
+    if (!event.selection) {
+        d3.selectAll('.highlight').remove(); // Clear highlight if no selection
+        updateBrushStats(null); // Hide stats display
+        return;
+    }   
+
+    // Get the brushed range in pixels
+    const [x0, x1] = event.selection;
+
+    // Convert the pixel range to data indices
+    const index0 = Math.round(xScale.invert(x0));
+    const index1 = Math.round(xScale.invert(x1));
+
+    // Ensure indices are within bounds
+    const startIndex = Math.max(0, index0);
+    const endIndex = Math.min(studentData.length - 1, index1);
+
+    // Get the selected data range
+    const selectedData = studentData.slice(startIndex, endIndex + 1);
+
+    if (selectedData.length === 0) return; // Avoid errors for empty selection
+
+    // Compute statistics
+    const minVal = d3.min(selectedData);
+    const maxVal = d3.max(selectedData);
+    const meanVal = d3.mean(selectedData);
+
+    // Find x-values corresponding to min/max
+    const minIndex = selectedData.indexOf(minVal) + startIndex;
+    const maxIndex = selectedData.indexOf(maxVal) + startIndex;
+
+    // Update UI with statistics
+    updateBrushStats({ startIndex, endIndex, minVal, maxVal, meanVal, minIndex, maxIndex });
+}
+
+function updateBrushStats(stats) {
+    const statsBox = document.getElementById('brush-stats')
+    console.log(stats)
+
+    if (!stats) {
+        statsBox.style.display = 'none'; // Hide if no selection
+        return;
+    }
+
+    // Populate stats info
+    statsBox.innerHTML = `
+        <strong>Brushed Tick Range:</strong> ${stats.startIndex} - ${stats.endIndex} <br>
+        <strong>Heartbeat Mean:</strong> ${stats.meanVal.toFixed(2)} <br>
+        <strong>Heartbeat Min:</strong> ${stats.minVal} (at x = ${stats.minIndex}) <br>
+        <strong>Heartbeat Max:</strong> ${stats.maxVal} (at x = ${stats.maxIndex}) <br>
+    `;
+
+    statsBox.style.display = 'block';
+}
