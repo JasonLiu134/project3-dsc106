@@ -3,7 +3,8 @@ const default_student = 'Student 1';
 const default_exam = 'Final';
 
 // Create variables
-let current_student = default_student;
+let current_students = [default_student];
+let mainStudent = default_student;
 let current_exam = default_exam;
 let student_line_visible = true;
 let mean_line_visible = true;
@@ -29,9 +30,11 @@ async function loadData() {
 // Call the initial functions when first loading the document
 document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
-    createLinePlot(default_student, default_exam);
+    createLinePlot(current_students, current_exam);
     updateTooltipVisibility('hidden');
     brushSelector();
+    createMainButtons();
+    updateMainHighlight();
 
     //Initializes the current default exam and student values with current classes
     d3.select(`[data-value='${default_exam}']`).classed("current", true);
@@ -39,13 +42,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Function to generate the overall Line Plot
-function createLinePlot(student, exam) {    
-    // Get the right exam data column with the name 'student'
+function createLinePlot(student, exam) {
+    // Get the right exam data column
     const examData = {'Midterm 1': midterm1Data, 'Midterm 2': midterm2Data, 'Final': finalData};
-    studentData = examData[exam].map(d => +d[student]).filter(d => d !== null && d !== 0);
+    studentData = examData[exam].map(d => +d[mainStudent]).filter(d => d !== null && d !== 0);
 
     // Define content window of the line plot (Lab)
-    const width = 1000;
+    const width = 1500;
     const height = 600;
     const margin = { top: 10, right: 10, bottom: 50, left: 50 };
     const usableArea = {
@@ -57,9 +60,14 @@ function createLinePlot(student, exam) {
         height: height - margin.top - margin.bottom,
     };
 
+    let dataLen = [];
+    student.forEach(s => {
+        dataLen.push(examData[exam].map(d => +d[s]).filter(d => d !== null && d !== 0).length);
+    });
+
     // Create the x and y scales of the data
     xScale = d3.scaleLinear()
-    .domain([0, studentData.length - 1])
+    .domain([0, Math.max(...dataLen) - 1])
     .range([0, width]);
 
     yScale = d3.scaleLinear()
@@ -125,22 +133,36 @@ function createLinePlot(student, exam) {
         'Student 5': d3.schemeCategory10[4],
         'Student 6': d3.schemeCategory10[5],
         'Student 7': d3.schemeCategory10[6],
-        'Student 8': d3.schemeCategory10[7],
+        'Student 8': '#523549',
         'Student 9': d3.schemeCategory10[8],
         'Student 10': d3.schemeCategory10[9],
       };
 
     // Create the different objects for the line plot visualization
-    // The line data + line plot
+    // The line data + line plots
     const lineData = d3.line().x((d, i) => xScale(i)).y(d => yScale(d));
+    student.forEach(s => {
+        const sData = examData[exam].map(d => +d[s]).filter(d => d !== null && d !== 0);
+        if (!(s === mainStudent)) {
+            const sLine = svg.append('path')
+                .datum(sData)
+                .attr('fill', 'none')
+                .attr('stroke', colors[s])
+                .attr('stroke-width', 2)
+                .attr('d', lineData)
+                .attr('class', 'student-line')
+                .attr('opacity', 0.4);
+        }
+    });
+
     const line = svg.append('path')
         .datum(studentData)
         .attr('fill', 'none')
-        .attr('stroke', colors[student])
+        .attr('stroke', colors[mainStudent])
         .attr('stroke-width', 2)
         .attr('d', lineData)
-        .attr('class', 'student-line')
-
+        .attr('class', 'student-line');
+    
     // Mean data + mean line
     const meanData = finalData.map(row => {
         const filtered = Object.values(row).map(d => +d).filter(d => d !== null && d !== 0);
@@ -152,7 +174,7 @@ function createLinePlot(student, exam) {
         .attr('stroke', 'gray')
         .attr('stroke-width', 2)
         .attr('d', lineData)
-        .attr('opacity', 0.4)
+        .attr('opacity', 0.2)
         .attr('class', 'mean-line');
         
     let x = width - 120
@@ -204,7 +226,7 @@ function createLinePlot(student, exam) {
         .attr("width", 15)
         .attr("height", 15)
         .attr("fill", "gray")
-        .attr("opacity", 0.4)
+        .attr("opacity", 0.2)
         .style("cursor", "pointer")
         .on("click", function() {
             mean_line_visible = !mean_line_visible;
@@ -236,7 +258,7 @@ function createLinePlot(student, exam) {
         .attr('r', '4')
         .attr('stroke', 'black')
         .attr('stroke-width', 2)
-        .attr('fill', d3.color(colors[student]).darker(1))
+        .attr('fill', d3.color(colors[mainStudent]).darker(1))
         .style('visibility', 'hidden')
         .attr('class', 'highlight-circle');
 
@@ -253,6 +275,7 @@ function createLinePlot(student, exam) {
             (student_line_visible || mean_line_visible)) {
             // Get the data value at the current location
             let dataPointValue = student_line_visible ? studentData[xIndex] : meanData[xIndex];
+            let meanDataValue = Math.round(meanData[xIndex] * 100) / 100;
 
             // Update the highlight line position
             highlightLine
@@ -268,10 +291,12 @@ function createLinePlot(student, exam) {
                 .attr('cy', yScale(dataPointValue))
                 .style('visibility', 'visible');
 
-            // Modify the line plot's opacity
-            line.attr('opacity', 0.75);
-            updateTooltipPosition(event);
-            updateTooltipData(dataPointValue, xIndex, student);
+            if (x_pos > 850) {
+                updateTooltipPosition(event, 'left');
+            } else {
+                updateTooltipPosition(event, 'right');
+            }
+            updateTooltipData(dataPointValue, meanDataValue, xIndex, mainStudent);
             updateTooltipVisibility('visible');
         } else {
             // Hide the highlight line if no line is visible
@@ -285,27 +310,78 @@ function createLinePlot(student, exam) {
     svg.on('pointerleave', function() {
         highlightLine.style('visibility', 'hidden');
         highlightCircle.style('visibility', 'hidden');
-        line.attr('opacity', 1);
         updateTooltipVisibility('hidden');
     });
 }
 
 // Function to update the line plot when selecting a different student
 function selectStudent(optionSelected) {
-    current_student = optionSelected;
+    if (!current_students.includes(optionSelected)) {
+        d3.select(`[data-value='${optionSelected}']`).classed("current", true);
+        current_students.push(optionSelected);
+    } else if (current_students.includes(optionSelected)) {
+        if (current_students.length > 1) {
+            d3.select(`[data-value='${optionSelected}']`).classed("current", false);
+            current_students = current_students.filter(s => s !== optionSelected);
+        }
+    }
+
+    if (!(current_students.includes(mainStudent))) {
+        mainStudent = current_students[0];
+        d3.selectAll(".mainselect").classed("current", false);
+        d3.select(`button.mainselect[data-value="${mainStudent}"]`).classed('current', true);
+    }
+
     student_line_visible = true;
     mean_line_visible = true;
     d3.select('#line').selectAll('svg').remove();
-    createLinePlot(current_student, current_exam);
-    document.getElementsByClassName("selectedstudent")[0].innerText = 'Current Student: ' + current_student;
+    createLinePlot(current_students, current_exam);
+    document.getElementsByClassName("selectedstudent")[0].innerText = 'Current Students: ' + current_students;
     brushSelector();
-
-    //Included to update the current student when its button when pressed
-    d3.selectAll(".option").classed("current", false);
-    d3.select(`[data-value='${optionSelected}']`).classed("current", true);
+    updateMainStudents();
 }
 
-// Function to allow buttons to change currently selected student
+// Function to create the main student buttons
+function createMainButtons() {
+    const mainButtons = d3.select('.updatemain');
+    finalData.columns.forEach(s => {
+        mainButtons.append('button').text('Set Main').attr('data-value', s).classed('mainselect', true).style('visibility', 'hidden');
+    });
+
+    current_students.forEach(s => {
+        d3.select(`button.mainselect[data-value="${s}"]`).style('visibility', 'visible');
+    });
+
+    updateMainHighlight();
+
+    d3.selectAll(".mainselect").on("click", function() {
+        const selectedStudent = d3.select(this).attr("data-value");
+        mainStudent = selectedStudent;
+        d3.select('#line').selectAll('svg').remove();
+        createLinePlot(current_students, current_exam);
+        d3.selectAll(".mainselect").classed("current", false);
+        d3.select(this).classed("current", true);
+    });
+}
+
+// Function to allow main student updating
+function updateMainStudents() {
+    finalData.columns.forEach(s => {
+        if (current_students.includes(s)) {
+            d3.select(`button.mainselect[data-value="${s}"]`).style('visibility', 'visible');
+        } else {
+            d3.select(`button.mainselect[data-value="${s}"]`).style('visibility', 'hidden');
+        }
+    });
+}
+
+// Simple function to update main highlight (for document loading)
+function updateMainHighlight() {
+    d3.selectAll(".mainselect").classed("current", false);
+    d3.select(`button.mainselect[data-value="${mainStudent}"]`).classed("current", true);
+}
+
+// Allow buttons to change currently selected student
 d3.selectAll(".option").on("click", function() {
     const selectedStudent = d3.select(this).attr("data-value");
     selectStudent(selectedStudent);
@@ -317,7 +393,7 @@ function selectExam(examSelected) {
     student_line_visible = true;
     mean_line_visible = true;
     d3.select('#line').selectAll('svg').remove();
-    createLinePlot(current_student, current_exam);
+    createLinePlot(current_students, current_exam);
     document.getElementsByClassName("selectedexam")[0].innerText = 'Current Exam: ' + current_exam;
     brushSelector();
 
@@ -333,15 +409,21 @@ d3.selectAll(".exam").on("click", function() {
 });
 
 // Function to update the tooltip position
-function updateTooltipPosition(event) {
+function updateTooltipPosition(event, side) {
     const tooltip = document.getElementById('tooltip');
-    tooltip.style.left = `${event.clientX + 20}px`;
+    if (side === 'left') {
+        tooltip.style.left = `${event.clientX - 140}px`;
+    } else {
+        tooltip.style.left = `${event.clientX + 20}px`;
+    }
     tooltip.style.top = `500px`;
 }
 
-function updateTooltipData(bpm_data, time_data, studentdisplayed) {
+// Function to update the data contained in the tooltip
+function updateTooltipData(bpm_data, mean_data, time_data, studentdisplayed) {
     const studentdisplay = document.getElementById('tooltipstudent');
     const bpm = document.getElementById('bpm');
+    const currentavg = document.getElementById('mean');
     const time = document.getElementById('time');
 
     if (student_line_visible) {
@@ -351,42 +433,34 @@ function updateTooltipData(bpm_data, time_data, studentdisplayed) {
     }
     
     bpm.textContent = bpm_data;
+    currentavg.textContent = mean_data;
     time.textContent = time_data;
 }
 
 // Function to hide/show the tooltip
 function updateTooltipVisibility(status) {
     const tooltip = document.getElementById('tooltip');
-    if (status === 'hidden') {
-        tooltip.hidden = true;
-    }
-    if (status === 'visible') {
-        tooltip.hidden = false;
-    }
+    tooltip.style.visibility = status;
 }
 
 // Function to create a brush selection box
 function brushSelector() {
-    const svg = d3.select('#line svg'); // Select the existing SVG inside #line
-    
+    const svg = d3.select('#line svg');
     const bWidth = +svg.attr('viewBox').split(' ')[2];
     const bHeight = +svg.attr('viewBox').split(' ')[3];
     
     const brush = d3.brushX()
-        .extent([[0, 0], [bWidth, bHeight - 100]]) // Define brushable area
+        .extent([[0, 0], [bWidth, bHeight - 50]])
         .on('start', brushStarted)
         .on('brush', brushed)
         .on('end', brushEnded);
     
-    // Append the brush to the SVG
-    svg.append('g')
-        .attr('class', 'brush')
-        .call(brush);
+    svg.append('g').attr('class', 'brush').call(brush);
 }
 
-// Function called when brushing starts
+// Function called when brushing starts to remove previous highlights
 function brushStarted(event) {
-    d3.selectAll('.highlight').remove(); // Remove any previous highlights
+    d3.selectAll('.highlight').remove();
 }
 
 // Function to handle brushing
@@ -397,13 +471,18 @@ function brushed(event) {
 // Function called when brushing ends
 function brushEnded(event) {
     if (!event.selection) {
-        d3.selectAll('.highlight').remove(); // Clear highlight if no selection
-        updateBrushStats(null); // Hide stats display
+        d3.selectAll('.highlight').remove();
+        updateBrushStats(null);
         return;
     }   
 
     // Get the brushed range in pixels
     const [x0, x1] = event.selection;
+
+    // Snap to data if brushed outside
+    if (x0 < 50) {
+        d3.select(".brush").call(d3.brushX().move, [50, x1]);
+    }
 
     // Convert the pixel range to data indices
     const index0 = Math.round(xScale.invert(x0));
@@ -415,8 +494,7 @@ function brushEnded(event) {
 
     // Get the selected data range
     const selectedData = studentData.slice(startIndex, endIndex + 1);
-
-    if (selectedData.length === 0) return; // Avoid errors for empty selection
+    if (selectedData.length === 0) return;
 
     // Compute statistics
     const minVal = d3.min(selectedData);
@@ -428,15 +506,14 @@ function brushEnded(event) {
     const maxIndex = selectedData.indexOf(maxVal) + startIndex;
 
     // Update UI with statistics
-    updateBrushStats({ startIndex, endIndex, minVal, maxVal, meanVal, minIndex, maxIndex });
+    updateBrushStats({startIndex, endIndex, minVal, maxVal, meanVal, minIndex, maxIndex});
 }
 
+// Function to update the displayed stats after brushing
 function updateBrushStats(stats) {
     const statsBox = document.getElementById('brush-stats')
-    console.log(stats)
-
     if (!stats) {
-        statsBox.style.display = 'none'; // Hide if no selection
+        statsBox.style.display = 'none';
         return;
     }
 
@@ -447,6 +524,5 @@ function updateBrushStats(stats) {
         <strong>Heartbeat Min:</strong> ${stats.minVal} (at x = ${stats.minIndex}) <br>
         <strong>Heartbeat Max:</strong> ${stats.maxVal} (at x = ${stats.maxIndex}) <br>
     `;
-
     statsBox.style.display = 'block';
 }

@@ -7,11 +7,20 @@
     border-radius: 10px;
     backdrop-filter: blur(2.5px);
     padding: 0.8em;
-  }
+    display: block;
+
+    p {
+      font-weight: bold;
+    }
+}
+
+dd {
+  margin: 0 0 10px 0px;
+}
 
 @keyframes marching-ants {
     to {
-      stroke-dashoffset: -8; /* 5 + 3 */
+      stroke-dashoffset: -8;
         }
     }
   
@@ -36,5 +45,133 @@
 
 .current {
   font-weight: bold;
-  text-decoration: underline;
+}
+
+.buttons {
+  display: grid;
+  gap: 1em;
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.exams {
+  width: 30em;
+  display: grid;
+  gap: 1em;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+button {
+  height: 2em;
+  font-size: 1.2em;
+  background-color: white;
+}
+
+button:hover {
+  background-color: lightgray;
+  transition-duration: 0.2s;
+}
+
+button.current {
+  color: white;
+}
+
+button[data-value="Student 1"] {
+  border-color: #1f77b4;
+}
+button.current[data-value="Student 1"] {
+  background-color: #1f77b4;
+}
+
+button[data-value="Student 2"] {
+  border-color: #ff7f0e;
+}
+button.current[data-value="Student 2"] {
+  background-color: #ff7f0e;
+}
+
+button[data-value="Student 3"] {
+  border-color: #2ca02c;
+}
+button.current[data-value="Student 3"] {
+  background-color: #2ca02c;
+}
+
+button[data-value="Student 4"] {
+  border-color: #d62728;
+}
+button.current[data-value="Student 4"] {
+  background-color: #d62728;
+}
+
+button[data-value="Student 5"] {
+  border-color: #9467bd;
+}
+button.current[data-value="Student 5"] {
+  background-color: #9467bd;
+}
+
+button[data-value="Student 6"] {
+  border-color: #8c564b;
+}
+button.current[data-value="Student 6"] {
+  background-color: #8c564b;
+}
+
+button[data-value="Student 7"] {
+  border-color: #e377c2;
+}
+button.current[data-value="Student 7"] {
+  background-color: #e377c2;
+}
+
+button[data-value="Student 8"] {
+  border-color: #523549;
+}
+button.current[data-value="Student 8"] {
+  background-color: #523549;
+}
+
+button[data-value="Student 9"] {
+  border-color: #bcbd22;
+}
+button.current[data-value="Student 9"] {
+  background-color: #bcbd22;
+}
+
+button[data-value="Student 10"] {
+  border-color: #17becf;
+}
+button.current[data-value="Student 10"] {
+  background-color: #17becf;
+}
+
+button[data-value="Midterm 1"] {
+  border-color: #dfa163;
+}
+button.current[data-value="Midterm 1"] {
+  background-color: #dfa163;
+}
+
+button[data-value="Midterm 2"] {
+  border-color: #769d7a;
+}
+button.current[data-value="Midterm 2"] {
+  background-color: #769d7a;
+}
+
+button[data-value="Final"] {
+  border-color: #ac83c4;
+}
+button.current[data-value="Final"] {
+  background-color: #ac83c4;
+}
+
+.updatemain {
+  display: grid;
+  gap: 1em;
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.mainselect {
+  height: 1.5em;
 }
