@@ -32,7 +32,7 @@ function createLinePlot(student, exam) {
     // Define content window of the line plot (Lab)
     const width = 1000;
     const height = 600;
-    const margin = { top: 10, right: 10, bottom: 30, left: 20 };
+    const margin = { top: 10, right: 10, bottom: 50, left: 50 };
     const usableArea = {
         top: margin.top,
         right: width - margin.right,
@@ -60,7 +60,27 @@ function createLinePlot(student, exam) {
     .append('svg')
     .attr('viewBox', `0 0 ${width} ${height}`)
     .style('overflow', 'visible');
-    
+
+    // Add x-axis label
+    svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height - 10)
+    .attr("text-anchor", "right")
+    .style("font-size", "14px")
+    .style("font-weight", "bold")
+    .text("Time (Minutes)");
+
+    // Add y-axis label
+    svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0) 
+    .attr("x", -height/2)
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .style("font-size", "14px")
+    .style("font-weight", "bold")
+    .text("Beats Per Minute (BPM)");
+
     // Create and scale the gridlines (Lab)
     const gridlines = svg.append('g')
     .attr('class', 'gridlines')
