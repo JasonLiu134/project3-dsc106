@@ -47,7 +47,7 @@ function createLinePlot(student, exam) {
     // Define content window of the line plot (Lab)
     const width = 1000;
     const height = 600;
-    const margin = { top: 10, right: 10, bottom: 30, left: 20 };
+    const margin = { top: 10, right: 10, bottom: 50, left: 50 };
     const usableArea = {
         top: margin.top,
         right: width - margin.right,
@@ -75,6 +75,27 @@ function createLinePlot(student, exam) {
     .append('svg')
     .attr('viewBox', `0 0 ${width} ${height}`)
     .style('overflow', 'visible');
+
+    // Add x-axis label
+    svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height - 10)
+    .attr("text-anchor", "right")
+    .style("font-size", "14px")
+    .style("font-weight", "bold")
+    .text("Time (Minutes)");
+
+    // Add y-axis label
+    svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0) 
+    .attr("x", -height/2)
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .style("font-size", "14px")
+    .style("font-weight", "bold")
+    .text("Beats Per Minute (BPM)");
+
     
     // Create and scale the gridlines (Lab)
     const gridlines = svg.append('g')
@@ -118,6 +139,7 @@ function createLinePlot(student, exam) {
         .attr('stroke', colors[student])
         .attr('stroke-width', 2)
         .attr('d', lineData)
+        .attr('class', 'student-line')
 
     // Mean data + mean line
     const meanData = finalData.map(row => {
@@ -132,7 +154,6 @@ function createLinePlot(student, exam) {
         .attr('d', lineData)
         .attr('opacity', 0.4)
         .attr('class', 'mean-line');
-
         
     let x = width - 120
     let y = margin.bottom + 450
@@ -140,14 +161,17 @@ function createLinePlot(student, exam) {
     // A draggable legend that allows filtering out the various lines
     const legend = svg.append("g")
         .attr("transform", `translate(${x}, ${y})`)
+        .style("cursor", "pointer")
         .on("mouseenter", () => mouse_over_legend = true)
         .on("mouseleave", () => mouse_over_legend = false);
+
     // The legend box
     legend.append("rect")
         .attr("width", 120)
         .attr("height", 50)
         .attr("fill", "white")
         .attr("stroke", "black");
+
     // The student line rect to filter in/out
     legend.append("rect")
         .attr("x", 10)
@@ -218,6 +242,8 @@ function createLinePlot(student, exam) {
 
     // Mousemove event for dynamic elements
     svg.on('mousemove', function(event) {
+        if (mouse_over_legend) return;
+
         // Get mouse position and position in relation to the xScale
         const [x_pos, y_pos] = d3.pointer(event);
         const xIndex = Math.round(xScale.invert(x_pos));
@@ -347,7 +373,7 @@ function brushSelector() {
     const bHeight = +svg.attr('viewBox').split(' ')[3];
     
     const brush = d3.brushX()
-        .extent([[0, 0], [bWidth, bHeight]]) // Define brushable area
+        .extent([[0, 0], [bWidth, bHeight - 100]]) // Define brushable area
         .on('start', brushStarted)
         .on('brush', brushed)
         .on('end', brushEnded);
