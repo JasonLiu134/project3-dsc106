@@ -5,8 +5,11 @@ const default_exam = 'Final';
 // Create variables
 let current_student = default_student;
 let current_exam = default_exam;
+let student_line_visible = true;
+let mean_line_visible = true;
+let mouse_over_legend = false;
 
-//Global Variables for brush
+//Global Variables for d3 Brush
 let xScale
 let yScale
 let studentData
@@ -17,11 +20,7 @@ let height
 let finalData = [];
 let midterm1Data = [];
 let midterm2Data = [];
-
 async function loadData() {
-    finalData = await d3.csv('datasets/finaldata.csv');
-    midterm1Data = await d3.csv('datasets/midterm1data.csv');
-    midterm2Data = await d3.csv('datasets/midterm2data.csv');
     finalData = await d3.csv('datasets/finaldata.csv');
     midterm1Data = await d3.csv('datasets/midterm1data.csv');
     midterm2Data = await d3.csv('datasets/midterm2data.csv');
@@ -33,6 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     createLinePlot(default_student, default_exam);
     updateTooltipVisibility('hidden');
     brushSelector();
+
+    //Initializes the current default exam and student values with current classes
     d3.select(`[data-value='${default_exam}']`).classed("current", true);
     d3.select(`[data-value='${default_student}']`).classed("current", true);
 });
@@ -129,8 +130,75 @@ function createLinePlot(student, exam) {
         .attr('stroke', 'gray')
         .attr('stroke-width', 2)
         .attr('d', lineData)
-        .attr('opacity', 0.4);
+        .attr('opacity', 0.4)
+        .attr('class', 'mean-line');
 
+        
+    let x = width - 120
+    let y = margin.bottom + 450
+    
+    // A draggable legend that allows filtering out the various lines
+    const legend = svg.append("g")
+        .attr("transform", `translate(${x}, ${y})`)
+        .on("mouseenter", () => mouse_over_legend = true)
+        .on("mouseleave", () => mouse_over_legend = false);
+    // The legend box
+    legend.append("rect")
+        .attr("width", 120)
+        .attr("height", 50)
+        .attr("fill", "white")
+        .attr("stroke", "black");
+    // The student line rect to filter in/out
+    legend.append("rect")
+        .attr("x", 10)
+        .attr("y", 5)
+        .attr("width", 15)
+        .attr("height", 15)
+        .attr("fill", colors[student])
+        .style("cursor", "pointer")
+        .on("click", function() {
+            student_line_visible = !student_line_visible;
+            d3.select(".student-line").style("display", student_line_visible ? "block" : "none");
+            if (!student_line_visible && !mean_line_visible) {
+                highlightLine.style('visibility', 'hidden');
+                highlightCircle.style('visibility', 'hidden');
+                updateTooltipVisibility('hidden');
+            }
+        });
+
+    // The student line indicator
+    legend.append("text")
+        .attr("x", 30)
+        .attr("y", 17)
+        .style("font-size", "14px")
+        .text("Student's BPM");
+
+    // The mean line rect to filter in/out
+    legend.append("rect")
+        .attr("x", 10)
+        .attr("y", 25)
+        .attr("width", 15)
+        .attr("height", 15)
+        .attr("fill", "gray")
+        .attr("opacity", 0.4)
+        .style("cursor", "pointer")
+        .on("click", function() {
+            mean_line_visible = !mean_line_visible;
+            d3.select(".mean-line").style("display", mean_line_visible ? "block" : "none");
+            if (!student_line_visible && !mean_line_visible) {
+                highlightLine.style('visibility', 'hidden');
+                highlightCircle.style('visibility', 'hidden');
+                updateTooltipVisibility('hidden');
+            }
+        });
+
+    // The mean line indicator
+    legend.append("text")
+        .attr("x", 30)
+        .attr("y", 37)
+        .style("font-size", "14px")
+        .text("Average BPM");
+    
     // The highlight line when hovering over the plot
     const highlightLine = svg.append('line')
         .attr('stroke', 'black')
@@ -155,7 +223,8 @@ function createLinePlot(student, exam) {
         const xIndex = Math.round(xScale.invert(x_pos));
 
         // Update interactive elements if the current location is within the line plot
-        if (xIndex >= 0 && xIndex < studentData.length) {
+        if (xIndex >= 0 && xIndex < studentData.length && 
+            (student_line_visible || mean_line_visible)) {
             // Get the data value at the current location
             let dataPointValue = student_line_visible ? studentData[xIndex] : meanData[xIndex];
 
@@ -183,9 +252,6 @@ function createLinePlot(student, exam) {
             highlightLine.style('visibility', 'hidden');
             highlightCircle.style('visibility', 'hidden');
             updateTooltipVisibility('hidden');
-            updateTooltipPosition(event);
-            updateTooltipData(dataPointValue, xIndex, student);
-            updateTooltipVisibility('visible');
         }
     });
 
@@ -195,7 +261,6 @@ function createLinePlot(student, exam) {
         highlightCircle.style('visibility', 'hidden');
         line.attr('opacity', 1);
         updateTooltipVisibility('hidden');
-        updateTooltipVisibility('hidden');
     });
 }
 
@@ -204,7 +269,6 @@ function selectStudent(optionSelected) {
     current_student = optionSelected;
     student_line_visible = true;
     mean_line_visible = true;
-    current_student = optionSelected;
     d3.select('#line').selectAll('svg').remove();
     createLinePlot(current_student, current_exam);
     document.getElementsByClassName("selectedstudent")[0].innerText = 'Current Student: ' + current_student;
@@ -259,7 +323,7 @@ function updateTooltipData(bpm_data, time_data, studentdisplayed) {
     } else {
         studentdisplay.textContent = "Average BPM";
     }
-
+    
     bpm.textContent = bpm_data;
     time.textContent = time_data;
 }
