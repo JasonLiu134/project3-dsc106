@@ -91,9 +91,9 @@ function createLinePlot(student, exam) {
     .attr("x", width / 2)
     .attr("y", height - 10)
     .attr("text-anchor", "right")
-    .style("font-size", "14px")
+    .style("font-size", "20px")
     .style("font-weight", "bold")
-    .text("Time (Minutes)");
+    .text("Time (Minutes)")
 
     // Add y-axis label
     svg.append("text")
@@ -102,7 +102,7 @@ function createLinePlot(student, exam) {
     .attr("x", -height/2)
     .attr("dy", "1em")
     .style("text-anchor", "middle")
-    .style("font-size", "14px")
+    .style("font-size", "20px")
     .style("font-weight", "bold")
     .text("Beats Per Minute (BPM)");
 
@@ -111,6 +111,7 @@ function createLinePlot(student, exam) {
     const gridlines = svg.append('g')
     .attr('class', 'gridlines')
     .attr('transform', `translate(${usableArea.left}, 0)`);
+    
 
     gridlines.call(d3.axisLeft(yScale).tickFormat('').tickSize(-usableArea.width)).style('opacity', 0.1);
     const xAxis = d3.axisBottom(xScale);
@@ -119,12 +120,14 @@ function createLinePlot(student, exam) {
     svg
     .append('g')
     .attr('transform', `translate(0, ${usableArea.bottom})`)
-    .call(xAxis);
+    .call(xAxis)
+    .style('font-size', '15px');
 
     svg
     .append('g')
     .attr('transform', `translate(${usableArea.left}, 0)`)
-    .call(yAxis);
+    .call(yAxis)
+    .style('font-size', '12px');
 
     // Define the colors for each student
     colors = {
@@ -322,9 +325,9 @@ function updateLegend() {
     let legendContainer = d3.select("#legend-container");
 
     // Generate legend content
-    let legendHTML = `<div style="font-size: 20px; margin-bottom: 10px; font-weight: bold;">Legend</div>`;
-    legendHTML += `<div><strong>Current Exam:</strong> ${current_exam}</div>`;
-    legendHTML += `<div style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 10px; padding-top: 10px; padding-bottom: 10px;"><strong>Students:</strong>`;
+    let legendHTML = `<div class="legend_title" style="margin-bottom: 10px; font-weight: bold;">Legend</div>`;
+    legendHTML += `<div class="class_title"><strong>Current Exam:</strong> ${current_exam}</div>`;
+    legendHTML += `<div class="students_title" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 10px; padding-top: 10px; padding-bottom: 10px;"><strong>Students:</strong>`;
     
     current_students.forEach(student => {
         legendHTML += `<div style="display: flex; gap: 5px; white-space: nowrap;">

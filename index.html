@@ -12,15 +12,14 @@
     <h1>How does Stress Influence Students during Exams?</h1>
     
     <h2>Student Heart Rate Throughout Exams</h2>
-    <div class="exams">
-        <button class="exam" data-value="Midterm 1">Midterm 1</button>
-        <button class="exam" data-value="Midterm 2">Midterm 2</button>
-        <button class="exam" data-value="Final">Final Exam</button>
-    </div>
 
     <div id="legend-container"></div>
 
-    <div id="line"></div>
+    <div id="line" style="position: relative">
+
+
+        <div id="brush-stats"></div>
+    </div>
     <dl id="tooltip" class="tooltip">
         <p id="tooltipstudent"></p>
         <dt>BPM</dt>
@@ -32,6 +31,12 @@
         <dt>Time</dt>
         <dd id="time"></dd>
     </dl>
+
+    <div class="exams">
+        <button class="exam" data-value="Midterm 1">Midterm 1</button>
+        <button class="exam" data-value="Midterm 2">Midterm 2</button>
+        <button class="exam" data-value="Final">Final Exam</button>
+    </div>
 
     <div class="buttons">
         <button class="option" data-value="Student 1">Student 1</button>
@@ -47,8 +52,6 @@
     </div>
 
     <div class="updatemain"></div>
-
-    <div id="brush-stats"></div>
     
 </body>
 </html>

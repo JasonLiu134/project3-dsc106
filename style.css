@@ -1,3 +1,19 @@
+h1 {
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  font-size: 2em;
+
+}
+
+h2 {
+
+  font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  text-align: left;
+  font-size: 1.3em;
+  font-style: bold;
+
+}
+
 .tooltip {
     position: fixed;
     top: 1em;
@@ -33,14 +49,15 @@ dd {
   }
 
 #brush-stats {
-    position: absolute;
-    left: 20px;
-    bottom: 20px;
-    background: rgba(255, 255, 255, 0.8);
+    position: absolute; 
+    bottom: 50px; 
+    right: 10px;
+    background: rgba(255, 255, 255, 0.5);
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
     display: none;
+    font-size: 1vw;
 }
 
 .current {
@@ -51,16 +68,30 @@ dd {
   border: 2px solid black !important;
   min-width: 100px;
   max-width: 1000px;
-  top: 80px;
-  left: 20px;
+  top: 60px;
+  right: 20px;
   margin-top: 10px;
-  padding: 15px;
+  padding: 10px;
   border-radius: 5px;
-  font-size: 15px;
+  font-size: 1vw;
   padding-left: 10px;
   display: inline-block;
   align-content: center;
+
+  .legend_title {
+    font-size: 15px;
+  }
+
+  .class_title {
+    font-size: 13px;
+  }
+  
+  .students_title {
+    font-size: 13px;
+  }
 }
+
+
 
 .buttons {
   display: grid;
@@ -69,16 +100,22 @@ dd {
 }
 
 .exams {
-  width: 30em;
+  width: 100%; /* Full width of the page */
   display: grid;
   gap: 1em;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 equal columns */
+  margin: 0.1em;
 }
 
 button {
   height: 2em;
-  font-size: 1.2em;
   background-color: white;
+  font-size: 1.2vw;
+  margin: 0.1em;
+
+  .exams {
+    font-size: 3vw;
+  }
 }
 
 button:hover {
