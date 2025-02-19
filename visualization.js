@@ -385,9 +385,9 @@ function updateLegend() {
         } else if (current_exam === 'Final') {
             studentGrade = studentGrades[2];
         }
-        legendHTML += `<div style="display: flex; gap: 5px; white-space: nowrap;">
-            <span style="width: 15px; height: 15px; background: ${colors[student]}; display: inline-block; border-radius: 3px;"></span>
-            <span style="color: ${colors[student]};">Score: ${studentGrade}</span>
+        legendHTML += `<div style="display: flex; gap: 3px; white-space: nowrap;">
+            <span style="width: 0.7vw; height: 0.7vw; background: ${colors[student]}; display: inline-block; border-radius: 3px;"></span>
+            <span style="color: ${colors[student]}; font-size: 0.7vw">Score: ${studentGrade}</span>
         </div>`;
     });
     legendHTML += `</div>`;

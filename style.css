@@ -249,3 +249,7 @@ button.current[data-value="currentaverage"] {
   top: 12em;
   right: 1em;
 }
+
+.gradedisplaygrid {
+  font-size: 1.2vw;
+}
