@@ -9,6 +9,7 @@ let current_exam = default_exam;
 let student_line_visible = true;
 let mean_line_visible = true;
 let mouse_over_legend = false;
+let colors;
 
 //Global Variables for d3 Brush
 let xScale
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     brushSelector();
     createMainButtons();
     updateMainHighlight();
+    updateLegend();
 
     //Initializes the current default exam and student values with current classes
     d3.select(`[data-value='${default_exam}']`).classed("current", true);
@@ -125,7 +127,7 @@ function createLinePlot(student, exam) {
     .call(yAxis);
 
     // Define the colors for each student
-    const colors = {
+    colors = {
         'Student 1': d3.schemeCategory10[0],
         'Student 2': d3.schemeCategory10[1],
         'Student 3': d3.schemeCategory10[2],
@@ -144,7 +146,7 @@ function createLinePlot(student, exam) {
     student.forEach(s => {
         const sData = examData[exam].map(d => +d[s]).filter(d => d !== null && d !== 0);
         if (!(s === mainStudent)) {
-            const sLine = svg.append('path')
+            svg.append('path')
                 .datum(sData)
                 .attr('fill', 'none')
                 .attr('stroke', colors[s])
@@ -155,7 +157,7 @@ function createLinePlot(student, exam) {
         }
     });
 
-    const line = svg.append('path')
+    svg.append('path')
         .datum(studentData)
         .attr('fill', 'none')
         .attr('stroke', colors[mainStudent])
@@ -168,7 +170,7 @@ function createLinePlot(student, exam) {
         const filtered = Object.values(row).map(d => +d).filter(d => d !== null && d !== 0);
         return filtered.reduce((sum, value) => sum + value, 0) / filtered.length;
     });
-    const meanLine = svg.append('path')
+    svg.append('path')
         .datum(meanData)
         .attr('fill', 'none')
         .attr('stroke', 'gray')
@@ -176,74 +178,7 @@ function createLinePlot(student, exam) {
         .attr('d', lineData)
         .attr('opacity', 0.2)
         .attr('class', 'mean-line');
-        
-    let x = width - 120
-    let y = margin.bottom + 450
     
-    // A draggable legend that allows filtering out the various lines
-    const legend = svg.append("g")
-        .attr("transform", `translate(${x}, ${y})`)
-        .style("cursor", "pointer")
-        .on("mouseenter", () => mouse_over_legend = true)
-        .on("mouseleave", () => mouse_over_legend = false);
-
-    // The legend box
-    legend.append("rect")
-        .attr("width", 120)
-        .attr("height", 50)
-        .attr("fill", "white")
-        .attr("stroke", "black");
-
-    // The student line rect to filter in/out
-    legend.append("rect")
-        .attr("x", 10)
-        .attr("y", 5)
-        .attr("width", 15)
-        .attr("height", 15)
-        .attr("fill", colors[student])
-        .style("cursor", "pointer")
-        .on("click", function() {
-            student_line_visible = !student_line_visible;
-            d3.select(".student-line").style("display", student_line_visible ? "block" : "none");
-            if (!student_line_visible && !mean_line_visible) {
-                highlightLine.style('visibility', 'hidden');
-                highlightCircle.style('visibility', 'hidden');
-                updateTooltipVisibility('hidden');
-            }
-        });
-
-    // The student line indicator
-    legend.append("text")
-        .attr("x", 30)
-        .attr("y", 17)
-        .style("font-size", "14px")
-        .text("Student's BPM");
-
-    // The mean line rect to filter in/out
-    legend.append("rect")
-        .attr("x", 10)
-        .attr("y", 25)
-        .attr("width", 15)
-        .attr("height", 15)
-        .attr("fill", "gray")
-        .attr("opacity", 0.2)
-        .style("cursor", "pointer")
-        .on("click", function() {
-            mean_line_visible = !mean_line_visible;
-            d3.select(".mean-line").style("display", mean_line_visible ? "block" : "none");
-            if (!student_line_visible && !mean_line_visible) {
-                highlightLine.style('visibility', 'hidden');
-                highlightCircle.style('visibility', 'hidden');
-                updateTooltipVisibility('hidden');
-            }
-        });
-
-    // The mean line indicator
-    legend.append("text")
-        .attr("x", 30)
-        .attr("y", 37)
-        .style("font-size", "14px")
-        .text("Average BPM");
     
     // The highlight line when hovering over the plot
     const highlightLine = svg.append('line')
@@ -336,7 +271,8 @@ function selectStudent(optionSelected) {
     mean_line_visible = true;
     d3.select('#line').selectAll('svg').remove();
     createLinePlot(current_students, current_exam);
-    document.getElementsByClassName("selectedstudent")[0].innerText = 'Current Students: ' + current_students;
+    updateLegend();
+    // document.getElementsByClassName("selectedstudent")[0].innerText = 'Current Students: ' + current_students;
     brushSelector();
     updateMainStudents();
 }
@@ -381,6 +317,26 @@ function updateMainHighlight() {
     d3.select(`button.mainselect[data-value="${mainStudent}"]`).classed("current", true);
 }
 
+// Function to update the legend at the top left
+function updateLegend() {
+    let legendContainer = d3.select("#legend-container");
+
+    // Generate legend content
+    let legendHTML = `<div style="font-size: 20px; margin-bottom: 10px; font-weight: bold;">Legend</div>`;
+    legendHTML += `<div><strong>Current Exam:</strong> ${current_exam}</div>`;
+    legendHTML += `<div style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 10px; padding-top: 10px; padding-bottom: 10px;"><strong>Students:</strong>`;
+    
+    current_students.forEach(student => {
+        legendHTML += `<div style="display: flex; gap: 5px; white-space: nowrap;">
+            <span style="width: 15px; height: 15px; background: ${colors[student]}; display: inline-block; border-radius: 3px;"></span>
+            <span style="color: ${colors[student]};">${student}</span>
+        </div>`;
+    });
+    legendHTML += `</div>`;
+    
+    legendContainer.html(legendHTML);
+}
+
 // Allow buttons to change currently selected student
 d3.selectAll(".option").on("click", function() {
     const selectedStudent = d3.select(this).attr("data-value");
@@ -394,7 +350,8 @@ function selectExam(examSelected) {
     mean_line_visible = true;
     d3.select('#line').selectAll('svg').remove();
     createLinePlot(current_students, current_exam);
-    document.getElementsByClassName("selectedexam")[0].innerText = 'Current Exam: ' + current_exam;
+    updateLegend();
+    // document.getElementsByClassName("selectedexam")[0].innerText = 'Current Exam: ' + current_exam;
     brushSelector();
 
     //Included to update the current exam when its button when pressed
