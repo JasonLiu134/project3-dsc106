@@ -2,62 +2,59 @@ h1 {
   font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
   font-size: 2em;
-
 }
 
 h2 {
-
   font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   text-align: left;
   font-size: 1.3em;
   font-style: bold;
-
 }
 
 .tooltip {
-    position: fixed;
-    top: 1em;
-    left: 1em;
-    background-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0px 3px 15px rgba(0,0,0,0.2);
-    border-radius: 10px;
-    backdrop-filter: blur(2.5px);
-    padding: 0.8em;
-    display: block;
+  position: fixed;
+  top: 1em;
+  left: 1em;
+  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0px 3px 15px rgba(0,0,0,0.2);
+  border-radius: 10px;
+  backdrop-filter: blur(2.5px);
+  padding: 0.8em;
+  display: block;
 
-    p {
-      font-weight: bold;
-    }
+  p {
+    font-weight: bold;
+  }
 }
 
 dd {
-  margin: 0 0 10px 0px;
+margin: 0 0 10px 0px;
 }
 
 @keyframes marching-ants {
-    to {
-      stroke-dashoffset: -8;
-        }
-    }
-  
-.selection {
-    fill-opacity: 0.1;
-    stroke: black;
-    stroke-opacity: 0.7;
-    stroke-dasharray: 5 3;
-    animation: marching-ants 2s linear infinite;
+  to {
+    stroke-dashoffset: -8;
   }
+}
+
+.selection {
+  fill-opacity: 0.1;
+  stroke: black;
+  stroke-opacity: 0.7;
+  stroke-dasharray: 5 3;
+  animation: marching-ants 2s linear infinite;
+}
 
 #brush-stats {
-    position: absolute; 
-    bottom: 50px; 
-    right: 10px;
-    background: rgba(255, 255, 255, 0.5);
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    display: none;
-    font-size: 1vw;
+  position: absolute; 
+  bottom: 50px; 
+  right: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  display: none;
+  font-size: 1vw;
 }
 
 .current {
@@ -67,7 +64,7 @@ dd {
 #legend-container {
   border: 2px solid black !important;
   min-width: 100px;
-  max-width: 1000px;
+  max-width: 1200px;
   top: 60px;
   right: 20px;
   margin-top: 10px;
@@ -81,7 +78,6 @@ dd {
   .legend_title {
     font-size: 15px;
   }
-
   .class_title {
     font-size: 13px;
   }
@@ -91,8 +87,6 @@ dd {
   }
 }
 
-
-
 .buttons {
   display: grid;
   gap: 1em;
@@ -100,19 +94,19 @@ dd {
 }
 
 .exams {
-  width: 100%; /* Full width of the page */
+  width: 100%;
   display: grid;
   gap: 1em;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 equal columns */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0.1em;
 }
 
 button {
   height: 2em;
-  background-color: white;
   font-size: 1.2vw;
+  background-color: white;
   margin: 0.1em;
-
+  
   .exams {
     font-size: 3vw;
   }
@@ -128,52 +122,52 @@ button.current {
 }
 
 button[data-value="Student 1"] {
-  border-color: #1f77b4;
+  border-color: #1969a2;
 }
 button.current[data-value="Student 1"] {
-  background-color: #1f77b4;
+  background-color: #1969a2;
 }
 
 button[data-value="Student 2"] {
-  border-color: #ff7f0e;
+  border-color: #ce6000;
 }
 button.current[data-value="Student 2"] {
-  background-color: #ff7f0e;
+  background-color: #ce6000;
 }
 
 button[data-value="Student 3"] {
-  border-color: #2ca02c;
+  border-color: #207920;
 }
 button.current[data-value="Student 3"] {
-  background-color: #2ca02c;
+  background-color: #207920;
 }
 
 button[data-value="Student 4"] {
-  border-color: #d62728;
+  border-color: #9e1a1a;
 }
 button.current[data-value="Student 4"] {
-  background-color: #d62728;
+  background-color: #9e1a1a;
 }
 
 button[data-value="Student 5"] {
-  border-color: #9467bd;
+  border-color: #854eb8;
 }
 button.current[data-value="Student 5"] {
-  background-color: #9467bd;
+  background-color: #854eb8;
 }
 
 button[data-value="Student 6"] {
-  border-color: #8c564b;
+  border-color: #71453c;
 }
 button.current[data-value="Student 6"] {
-  background-color: #8c564b;
+  background-color: #71453c;
 }
 
 button[data-value="Student 7"] {
-  border-color: #e377c2;
+  border-color: #b75f9c;
 }
 button.current[data-value="Student 7"] {
-  background-color: #e377c2;
+  background-color: #b75f9c;
 }
 
 button[data-value="Student 8"] {
@@ -184,17 +178,17 @@ button.current[data-value="Student 8"] {
 }
 
 button[data-value="Student 9"] {
-  border-color: #bcbd22;
+  border-color: #72720e;
 }
 button.current[data-value="Student 9"] {
-  background-color: #bcbd22;
+  background-color: #72720e;
 }
 
 button[data-value="Student 10"] {
-  border-color: #17becf;
+  border-color: #1393a1;
 }
 button.current[data-value="Student 10"] {
-  background-color: #17becf;
+  background-color: #1393a1;
 }
 
 button[data-value="Midterm 1"] {
@@ -226,4 +220,32 @@ button.current[data-value="Final"] {
 
 .mainselect {
   height: 1.5em;
+}
+
+.gradedisplaygrid {
+  display: grid;
+  gap: 1em;
+  grid-template-columns: repeat(10, 1fr);
+  justify-items: center;
+  height: 2em;
+}
+
+button[data-value="overallaverage"] {
+  border-color: #0f0d11;
+}
+button.current[data-value="overallaverage"] {
+  background-color: #0f0d11;
+}
+
+button[data-value="currentaverage"] {
+  border-color: #585858;
+}
+button.current[data-value="currentaverage"] {
+  background-color: #585858;
+}
+
+#show-averages {
+  position: absolute;
+  top: 12em;
+  right: 1em;
 }

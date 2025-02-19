@@ -14,19 +14,18 @@
     <h2>Student Heart Rate Throughout Exams</h2>
 
     <div id="legend-container"></div>
+    <div id="show-averages">
+        <button class="averages" data-value="currentaverage">Show Current Avgs</button>
+        <button class="averages" data-value="overallaverage">Show Overall Exam Avgs</button>
+    </div>
 
     <div id="line" style="position: relative">
-
-
         <div id="brush-stats"></div>
     </div>
     <dl id="tooltip" class="tooltip">
         <p id="tooltipstudent"></p>
         <dt>BPM</dt>
         <dd id="bpm"></dd>
-
-        <dt>Average BPM</dt>
-        <dd id="mean"></dd>
       
         <dt>Time</dt>
         <dd id="time"></dd>
@@ -36,6 +35,19 @@
         <button class="exam" data-value="Midterm 1">Midterm 1</button>
         <button class="exam" data-value="Midterm 2">Midterm 2</button>
         <button class="exam" data-value="Final">Final Exam</button>
+    </div>
+
+    <div class="gradedisplaygrid">
+        <p class="gradedisplay" id="Student 1"></p>
+        <p class="gradedisplay" id="Student 2"></p>
+        <p class="gradedisplay" id="Student 3"></p>
+        <p class="gradedisplay" id="Student 4"></p>
+        <p class="gradedisplay" id="Student 5"></p>
+        <p class="gradedisplay" id="Student 6"></p>
+        <p class="gradedisplay" id="Student 7"></p>
+        <p class="gradedisplay" id="Student 8"></p>
+        <p class="gradedisplay" id="Student 9"></p>
+        <p class="gradedisplay" id="Student 10"></p>
     </div>
 
     <div class="buttons">
@@ -52,6 +64,11 @@
     </div>
 
     <div class="updatemain"></div>
+
+    <h2>Visualization Instructions</h2>
+    <p>This interactive visualizion comes with several features. Here are a list of what the visualization can do:
+        
+    </p>
     
 </body>
 </html>
